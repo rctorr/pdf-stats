@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 """
-__main__.py — Punto de entrada del comando pdf-stats.
-
-Uso:
-    pdf-stats archivo.pdf
+__main__.py — Punto de entrada del comando pdf-stats (con interfaz Gooey).
 """
 
-import argparse
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from gooey import Gooey, GooeyParser
 import pdfplumber
 
 
@@ -79,24 +76,6 @@ def compute_stats(filepath: Path) -> PDFStats:
     )
 
 
-# ---------------------------------------------------------------------------
-# Interfaz de línea de comandos
-# ---------------------------------------------------------------------------
-
-def parse_args() -> argparse.Namespace:
-    """Define y procesa los argumentos de línea de comandos."""
-    parser = argparse.ArgumentParser(
-        description="Muestra estadísticas de un archivo PDF.",
-        epilog="Ejemplo: pdf-stats documento.pdf",
-    )
-    parser.add_argument(
-        "pdf_file",
-        type=Path,
-        help="Ruta al archivo PDF que se desea analizar.",
-    )
-    return parser.parse_args()
-
-
 def validate_pdf_path(path: Path) -> None:
     """Valida que el archivo exista y tenga extensión .pdf."""
     if not path.exists():
@@ -107,13 +86,53 @@ def validate_pdf_path(path: Path) -> None:
         raise ValueError(f"El archivo no tiene extensión .pdf: '{path}'")
 
 
+# ---------------------------------------------------------------------------
+# Interfaz de usuario (Gooey GUI + CLI)
+# ---------------------------------------------------------------------------
+
+@Gooey(
+    program_name="Analizador de Estadísticas PDF",
+    header_show_title=True,
+    header_show_subtitle=True,
+    header_show_icon=False,          # Oculta el icono de herramientas por defecto
+    default_size=(640, 440),
+    language="spanish",              # Idioma oficial en español (Cancelar, Examinar, Empezar)
+    navigation="NONE",               # Oculta pestañas laterales e intermedias
+    # --- Paleta de Colores ---
+    header_bg_color="#1e293b",       # Azul Slate Oscuro
+    header_title_color="#ffffff",     # Título Blanco
+    header_subtitle_color="#cbd5e1",  # Subtítulo Gris Claro
+    body_bg_color="#ffffff",         # Fondo de cuerpo Blanco
+    footer_bg_color="#f1f5f9",       # Pie de página Gris Suave
+    terminal_panel_color="#0f172a",  # Consola Azul Noche
+    terminal_font_color="#38bdf8",   # Texto Resultados Azul Cian Neón
+    richtext_controls=False,          # Evita incompatibilidad con la librería 'colored'
+    show_stop_button=False,
+    show_restart_button=False,
+    show_success_modal=False,        # Desactiva el modal emergente redundante y evita la etiqueta no traducida "(Translate me!)"
+)
+def parse_args():
+    """Define los argumentos del programa con un selector de archivos de Gooey."""
+    parser = GooeyParser(description="Obtiene el número de caracteres, palabras, líneas y páginas.")
+    
+    parser.add_argument(
+        "pdf_file",
+        metavar="Archivo PDF",
+        help="Selecciona el archivo PDF a analizar",
+        widget="FileChooser",
+        gooey_options={"wildcard": "Archivos PDF (*.pdf)|*.pdf"}
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
-    """Punto de entrada principal. Retorna el código de salida."""
+    """Punto de entrada principal."""
     args = parse_args()
+    pdf_path = Path(args.pdf_file)
 
     try:
-        validate_pdf_path(args.pdf_file)
-        stats = compute_stats(args.pdf_file)
+        validate_pdf_path(pdf_path)
+        stats = compute_stats(pdf_path)
         print(stats)
     except (FileNotFoundError, ValueError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
