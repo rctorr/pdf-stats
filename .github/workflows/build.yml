@@ -1,5 +1,15 @@
 name: Construir Ejecutables Multiplataforma
 
+# -------------------------------------------------                                  
+# 👇 NEW: give the default token the required scopes                                 
+permissions:                                                                         
+  contents: write          # needed to create a release                              
+  # optional but useful for future steps                                             
+  packages: write                                                                    
+  # explicit release permission (GitHub added this later)                            
+  releases: write         # uncomment if you have a newer repo where this is required 
+# ------------------------------------------------- 
+
 on:
   push:
     tags:
@@ -95,7 +105,7 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Crear GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             pdf-stats-windows/pdf-stats-windows.zip
