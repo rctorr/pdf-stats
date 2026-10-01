@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdf-stats"
+version = "0.1.0"
+description = "Muestra estadísticas de un archivo PDF: páginas, líneas, palabras y caracteres."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["pdfplumber>=0.10"]
+
+[project.scripts]
+pdf-stats = "pdf_stats.__main__:main"
