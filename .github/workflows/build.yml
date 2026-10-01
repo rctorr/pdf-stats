@@ -7,7 +7,7 @@ permissions:
   # optional but useful for future steps                                             
   packages: write                                                                    
   # explicit release permission (GitHub added this later)                            
-  releases: write         # uncomment if you have a newer repo where this is required 
+  # releases: write         # uncomment if you have a newer repo where this is required 
 # ------------------------------------------------- 
 
 on:
