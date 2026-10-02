@@ -101,12 +101,32 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
+      # ── Se necesita el código fuente completo para que git-cliff lea el historial ──
+      - name: Descargar Código Fuente (historial completo)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 0 = clonar TODO el historial de commits y tags
+
+      # ── Generar el cuerpo del release automáticamente con git-cliff ──
+      - name: Generar Changelog del Release
+        uses: orhun/git-cliff-action@v3
+        id: git-cliff
+        with:
+          config: cliff.toml          # usa nuestra configuración
+          args: --latest --strip header  # solo el bloque de la última versión, sin encabezado global
+        env:
+          OUTPUT: RELEASE_BODY.md     # guarda el resultado en este archivo temporal
+          GITHUB_REPO: ${{ github.repository }}
+
+      # ── Descargar los ejecutables compilados por el job anterior ──
       - name: Descargar Todos los Artefactos
         uses: actions/download-artifact@v4
 
+      # ── Publicar la release con el cuerpo generado automáticamente ──
       - name: Crear GitHub Release
         uses: softprops/action-gh-release@v3
         with:
+          body: ${{ steps.git-cliff.outputs.content }}
           files: |
             pdf-stats-windows/pdf-stats-windows.zip
             pdf-stats-linux/pdf-stats-linux.tar.gz

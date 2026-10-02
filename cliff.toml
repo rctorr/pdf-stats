@@ -1,0 +1,81 @@
+# git-cliff configuration file
+# https://git-cliff.org/docs/configuration
+
+[changelog]
+# Plantilla del encabezado del CHANGELOG completo
+header = """
+# Changelog\n
+Todos los cambios notables en este proyecto serán documentados en este archivo.\n
+El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
+y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).\n
+---\n
+"""
+
+# Plantilla de cada bloque de versión (usa Tera, similar a Jinja2)
+body = """
+{% if version %}\
+## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+## [Unreleased]
+{% endif %}\
+
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | upper_first }}\
+{% endfor %}
+{% endfor %}
+"""
+
+# Texto que se añade al final del CHANGELOG completo
+footer = """
+---
+
+[Unreleased]: https://github.com/rctorr/pdf-stats/compare/{{ context.latest_version }}...HEAD
+"""
+
+# Elimina los saltos de línea duplicados en la salida final
+trim = true
+
+[git]
+# Activar el parsing de Conventional Commits
+conventional_commits = true
+
+# Ignorar commits que no siguen la convención
+filter_unconventional = false
+
+# Dividir los commits con múltiples párrafos en entradas separadas
+split_commits = false
+
+# Expresiones regulares para determinar el ORDER de los grupos en el changelog
+commit_preprocessors = [
+  { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/rctorr/pdf-stats/issues/${2}))" },
+]
+
+# Mapeo de tipos Conventional Commits → secciones del changelog
+commit_parsers = [
+  { message = "^feat",     group = "✨ Nuevas Funcionalidades" },
+  { message = "^fix",      group = "🐛 Correcciones"          },
+  { message = "^perf",     group = "⚡ Mejoras de Rendimiento" },
+  { message = "^refactor", group = "♻️  Refactorización"       },
+  { message = "^docs",     group = "📚 Documentación"          },
+  { message = "^test",     group = "🧪 Tests"                  },
+  { message = "^ci",       group = "⚙️  CI/CD"                 },
+  { message = "^chore",    group = "🔧 Mantenimiento"          },
+  { message = "^revert",   group = "⏪ Reversiones"            },
+  # Ignorar dependabot y commits de merge automáticos
+  { message = "^Merge",    skip = true                         },
+]
+
+# Ordenar los commits dentro de cada grupo por fecha (más reciente primero)
+sort_commits = "newest"
+
+# Filtrar tags que no sean versiones semánticas
+tag_pattern = "v[0-9].*"
+
+# Ignorar tags pre-release si no quieres que aparezcan (descomenta si lo necesitas)
+# skip_tags = "v0\\.1\\.[0-2]"
+
+# Ignorar los commits de CI del changelog de la release (el body del release)
+# Comenta estas líneas si quieres ver todo en el CHANGELOG.md completo
+# protect_breaking_commits = false
