@@ -8,7 +8,7 @@ Herramienta multiplataforma para analizar estadísticas de archivos PDF (página
 
 Si solo deseas usar la aplicación sin configurar entornos ni usar comandos:
 
-1. Ve a la sección de **[Releases de GitHub](https://github.com/tu-usuario/pdf-stats/releases)**.
+1. Ve a la sección de **[Releases de GitHub](https://github.com/rctorr/pdf-stats/releases)**.
 2. Descarga el ejecutable comprimido para tu sistema operativo:
    - 🪟 **Windows:** `pdf-stats-windows.zip`
    - 🍏 **macOS:** `pdf-stats-macos.zip`
